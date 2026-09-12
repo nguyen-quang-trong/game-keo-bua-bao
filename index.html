@@ -1,9 +1,141 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Game keo bua bao</title>
-    </head>
-    <body>
-        
-    </body>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <!-- Thẻ viewport giúp game co giãn hoàn hảo trên màn hình điện thoại -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Số 1, 2, 3</title>
+    <style>
+        /* CSS: Thiết kế giao diện đơn giản, hiện đại và tập trung vào trải nghiệm di động */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 350px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #ff5722;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .choices {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        /* Các nút bấm to bản giúp ngón tay chạm dễ dàng không bị bấm nhầm */
+        .btn-choice {
+            flex: 1;
+            margin: 0 5px;
+            padding: 15px 0;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: #fafafa;
+            transition: 0.2s;
+        }
+
+        .btn-choice:active {
+            background-color: #e0e0e0;
+            transform: scale(0.95);
+        }
+
+        .result-box {
+            margin-top: 20px;
+            font-size: 18px;
+            min-height: 60px;
+            font-weight: bold;
+        }
+
+        .score-board {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Số 1, 2, 3</h1>
+        <p>Chọn một số bất kỳ bên dưới. Máy sẽ quay số ngẫu nhiên từ 1 đến 3, nếu bạn đoán trùng thì thắng!</p>
+
+        <!-- Khu vực các nút bấm để người chơi chọn -->
+        <div class="choices">
+            <button class="btn-choice" onclick="choiGame(1)">1️⃣</button>
+            <button class="btn-choice" onclick="choiGame(2)">2️⃣</button>
+            <button class="btn-choice" onclick="choiGame(3)">3️⃣</button>
+        </div>
+
+        <!-- Nơi hiển thị kết quả -->
+        <div class="result-box" id="ketQua">
+            Hãy bấm chọn một số để bắt đầu!
+        </div>
+
+        <!-- Bảng điểm cơ bản -->
+        <div class="score-board">
+            Thắng: <span id="diemThang">0</span> | Thua: <span id="diemThua">0</span>
+        </div>
+    </div>
+
+    <script>
+        // JAVASCRIPT: Xử lý logic trò chơi
+        let diemThang = 0;
+        let diemThua = 0;
+
+        function choiGame(nguoiChon) {
+            // 1. Máy tính chọn ngẫu nhiên số 1, 2 hoặc 3
+            let mayChon = Math.floor(Math.random() * 3) + 1;
+
+            // 2. Lấy các thẻ HTML để thay đổi nội dung
+            let hopKetQua = document.getElementById("ketQua");
+            let textThang = document.getElementById("diemThang");
+            let textThua = document.getElementById("diemThua");
+
+            // 3. So sánh kết quả và cập nhật giao diện
+            let thongBao = `Bạn chọn: <b>${nguoiChon}</b><br>Máy chọn: <b>${mayChon}</b><br>`;
+
+            if (nguoiChon === mayChon) {
+                thongBao += "<span style='color: green;'>🎉 Chúc mừng bạn đã đoán đúng!</span>";
+                diemThang++;
+                textThang.innerText = diemThang;
+            } else {
+                thongBao += "<span style='color: red;'>❌ Tiếc quá, đoán trật rồi!</span>";
+                diemThua++;
+                textThua.innerText = diemThua;
+            }
+
+            // Đưa thông báo ra màn hình
+            hopKetQua.innerHTML = thongBao;
+        }
+    </script>
+
+</body>
 </html>
