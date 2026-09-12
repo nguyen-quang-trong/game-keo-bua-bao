@@ -2,11 +2,9 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <!-- Thẻ viewport giúp game co giãn hoàn hảo trên màn hình điện thoại -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Game Số 1, 2, 3</title>
+    <title>Game Số 1, 2, 3 - Đa người chơi</title>
     <style>
-        /* CSS: Thiết kế giao diện đơn giản, hiện đại và tập trung vào trải nghiệm di động */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
@@ -19,6 +17,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            box-sizing: border-box;
         }
 
         .game-container {
@@ -27,19 +26,44 @@
             border-radius: 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 350px;
+            max-width: 380px;
             box-sizing: border-box;
         }
 
         h1 {
             color: #ff5722;
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 22px;
+            margin-bottom: 5px;
         }
 
-        p {
+        .step-box {
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
             font-size: 16px;
-            color: #666;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:active {
+            background-color: #e64a19;
         }
 
         .choices {
@@ -48,7 +72,6 @@
             margin: 20px 0;
         }
 
-        /* Các nút bấm to bản giúp ngón tay chạm dễ dàng không bị bấm nhầm */
         .btn-choice {
             flex: 1;
             margin: 0 5px;
@@ -59,81 +82,167 @@
             border: 2px solid #ddd;
             border-radius: 10px;
             background-color: #fafafa;
-            transition: 0.2s;
         }
 
         .btn-choice:active {
             background-color: #e0e0e0;
-            transform: scale(0.95);
         }
 
-        .result-box {
-            margin-top: 20px;
+        .player-turn {
             font-size: 18px;
-            min-height: 60px;
+            color: #2196F3;
             font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        .score-board {
-            margin-top: 15px;
+        .scoreboard {
+            margin-top: 20px;
+            text-align: left;
+            background: #fafafa;
+            padding: 10px;
+            border-radius: 8px;
             font-size: 14px;
-            color: #888;
         }
     </style>
 </head>
 <body>
 
     <div class="game-container">
-        <h1>Số 1, 2, 3</h1>
-        <p>Chọn một số bất kỳ bên dưới. Máy sẽ quay số ngẫu nhiên từ 1 đến 3, nếu bạn đoán trùng thì thắng!</p>
+        <h1>🎮 Số 1, 2, 3 (Nhiều Người Chơi)</h1>
 
-        <!-- Khu vực các nút bấm để người chơi chọn -->
-        <div class="choices">
-            <button class="btn-choice" onclick="choiGame(1)">1️⃣</button>
-            <button class="btn-choice" onclick="choiGame(2)">2️⃣</button>
-            <button class="btn-choice" onclick="choiGame(3)">3️⃣</button>
+        <!-- BƯỚC 1: NHẬP TÊN NGƯỜI CHƠI -->
+        <div id="setupScreen" class="step-box">
+            <p>Nhập tên các người chơi (cách nhau bằng dấu phẩy):</p>
+            <input type="text" id="inputNames" value="An, Bình, Châu">
+            <br>
+            <button onclick="batDauGame()">Bắt đầu chơi</button>
         </div>
 
-        <!-- Nơi hiển thị kết quả -->
-        <div class="result-box" id="ketQua">
-            Hãy bấm chọn một số để bắt đầu!
+        <!-- BƯỚC 2: MÀN HÌNH CHỌN SỐ (CHUYỀN TAY) -->
+        <div id="playScreen" class="step-box" style="display: none;">
+            <div class="player-turn" id="thongBaoLuot">Lượt của: An</div>
+            <p>Hãy giữ bí mật và chọn một số từ 1 đến 3:</p>
+            
+            <div class="choices">
+                <button class="btn-choice" onclick="chonSo(1)">1️⃣</button>
+                <button class="btn-choice" onclick="chonSo(2)">2️⃣</button>
+                <button class="btn-choice" onclick="chonSo(3)">3️⃣</button>
+            </div>
         </div>
 
-        <!-- Bảng điểm cơ bản -->
-        <div class="score-board">
-            Thắng: <span id="diemThang">0</span> | Thua: <span id="diemThua">0</span>
+        <!-- BƯỚC 3: HIỂN THỊ KẾT QUẢ VÒNG CHƠI -->
+        <div id="resultScreen" class="step-box" style="display: none;">
+            <h3>📊 Kết quả vòng này</h3>
+            <p id="ketQuaVong">Đang tính...</p>
+            <button onclick="choiVongTiep()">Chơi vòng tiếp theo</button>
+        </div>
+
+        <!-- BẢNG ĐIỂM TỔNG KẾT -->
+        <div class="scoreboard" id="bangDiemContainer" style="display: none;">
+            <b>Bảng điểm hiện tại:</b>
+            <div id="danhSachDiem"></div>
         </div>
     </div>
 
     <script>
-        // JAVASCRIPT: Xử lý logic trò chơi
-        let diemThang = 0;
-        let diemThua = 0;
+        let danhSachNguoiChoi = [];
+        let diemSo = {};
+        let luotHienTai = 0;
+        let luaChonCuaNguoiChoi = {};
 
-        function choiGame(nguoiChon) {
-            // 1. Máy tính chọn ngẫu nhiên số 1, 2 hoặc 3
-            let mayChon = Math.floor(Math.random() * 3) + 1;
+        function batDauGame() {
+            let input = document.getElementById("inputNames").value;
+            // Tách tên người chơi dựa vào dấu phẩy và lọc bỏ khoảng trắng thừa
+            danhSachNguoiChoi = input.split(",").map(name => name.trim()).filter(name => name.length > 0);
 
-            // 2. Lấy các thẻ HTML để thay đổi nội dung
-            let hopKetQua = document.getElementById("ketQua");
-            let textThang = document.getElementById("diemThang");
-            let textThua = document.getElementById("diemThua");
-
-            // 3. So sánh kết quả và cập nhật giao diện
-            let thongBao = `Bạn chọn: <b>${nguoiChon}</b><br>Máy chọn: <b>${mayChon}</b><br>`;
-
-            if (nguoiChon === mayChon) {
-                thongBao += "<span style='color: green;'>🎉 Chúc mừng bạn đã đoán đúng!</span>";
-                diemThang++;
-                textThang.innerText = diemThang;
-            } else {
-                thongBao += "<span style='color: red;'>❌ Tiếc quá, đoán trật rồi!</span>";
-                diemThua++;
-                textThua.innerText = diemThua;
+            if (danhSachNguoiChoi.length < 1) {
+                alert("Vui lòng nhập ít nhất 1 người chơi!");
+                return;
             }
 
-            // Đưa thông báo ra màn hình
-            hopKetQua.innerHTML = thongBao;
+            // Khởi tạo điểm số bằng 0 cho từng người
+            diemSo = {};
+            danhSachNguoiChoi.forEach(name => {
+                diemSo[name] = 0;
+            });
+
+            // Chuyển sang màn hình chơi
+            document.getElementById("setupScreen").style.display = "none";
+            document.getElementById("playScreen").style.display = "block";
+            document.getElementById("bangDiemContainer").style.display = "block";
+
+            luotHienTai = 0;
+            luaChonCuaNguoiChoi = {};
+            capNhatGiaoDienLuot();
+            capNhatBangDiem();
+        }
+
+        function capNhatGiaoDienLuot() {
+            let tenHienTai = danhSachNguoiChoi[luotHienTai];
+            document.getElementById("thongBaoLuot").innerText = `Đưa điện thoại cho: 👤 ${tenHienTai}`;
+        }
+
+        function chonSo(so) {
+            let tenHienTai = danhSachNguoiChoi[luotHienTai];
+            // Lưu lựa chọn của người chơi hiện tại
+            luaChonCuaNguoiChoi[tenHienTai] = so;
+
+            luotHienTai++;
+
+            // Nếu vẫn còn người chơi tiếp theo, chuyển lượt
+            if (luotHienTai < danhSachNguoiChoi.length) {
+                alert(`Đã ghi nhận của ${tenHienTai}! Hãy đưa máy cho người tiếp theo.`);
+                capNhatGiaoDienLuot();
+            } else {
+                // Đã hết người chơi, tiến hành quay số và tổng kết
+                tinhKetQuaVong();
+            }
+        }
+
+        function tinhKetQuaVong() {
+            // Máy random số từ 1 đến 3
+            let soMay = Math.floor(Math.random() * 3) + 1;
+            let htmlKetQua = `Máy chọn số: <b>${soMay}</b><br><br>`;
+            let coNguoiTrung = false;
+
+            danhSachNguoiChoi.forEach(name => {
+                let soChon = luaChonCuaNguoiChoi[name];
+                if (soChon === soMay) {
+                    htmlKetQua += `🎉 <b>${name}</b> chọn ${soChon} -> <b>ĐÚNG (+1 điểm)</b><br>`;
+                    diemSo[name]++;
+                    coNguoiTrung = true;
+                } else {
+                    htmlKetQua += `❌ ${name} chọn ${soChon} -> Trật rồi<br>`;
+                }
+            });
+
+            if (!coNguoiTrung) {
+                htmlKetQua += `<br><i>Tiếc quá, không ai đoán trúng vòng này cả!</i>`;
+            }
+
+            document.getElementById("ketQuaVong").innerHTML = htmlKetQua;
+
+            // Chuyển màn hình sang xem kết quả
+            document.getElementById("playScreen").style.display = "none";
+            document.getElementById("resultScreen").style.display = "block";
+
+            capNhatBangDiem();
+        }
+
+        function choiVongTiep() {
+            luotHienTai = 0;
+            luaChonCuaNguoiChoi = {};
+            document.getElementById("resultScreen").style.display = "none";
+            document.getElementById("playScreen").style.display = "block";
+            capNhatGiaoDienLuot();
+        }
+
+        function capNhatBangDiem() {
+            let htmlDiem = "";
+            for (let name in diemSo) {
+                htmlDiem += `• ${name}: <b>${diemSo[name]} điểm</b><br>`;
+            }
+            document.getElementById("danhSachDiem").innerHTML = htmlDiem;
         }
     </script>
 
